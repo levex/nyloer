@@ -14,6 +14,7 @@ import net.runelite.client.ui.PluginPanel;
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 
 
@@ -71,8 +72,13 @@ public class NyloerSidePanel extends PluginPanel
 		layout.add(swapsFrame);
 
 		layout.add(Box.createRigidArea(new Dimension(0, 15)));
+		JPanel scalePane = createScalePane();
+		layout.add(scalePane);
+
+		layout.add(Box.createRigidArea(new Dimension(0, 15)));
 		JScrollPane stallsPane = createStallsPane();
 		layout.add(stallsPane);
+
 
 		layout.add(Box.createRigidArea(new Dimension(0, 15)));
 		JPanel statsPane = createRecentStatsFrame();
@@ -119,6 +125,33 @@ public class NyloerSidePanel extends PluginPanel
 				stallsTableModel.removeRow(i);
 			}
 		}
+	}
+
+	private JPanel createScalePane()
+	{
+		JPanel swapsFrame = new JPanel();
+		swapsFrame.setLayout(new GridLayout(2, 2));
+		TitledBorder border = BorderFactory.createTitledBorder(new LineBorder(Color.BLACK), "Dim Settings");
+		border.setTitleFont(tableTitleFont);
+		swapsFrame.setBorder(border);
+
+		JLabel l = new JLabel("Darker Wave");
+		JSpinner waveS = new JSpinner(new SpinnerNumberModel(config.darkerWave(), 25, 35, 1));
+		waveS.addChangeListener(e -> {
+			config.setDarkerWave((int) waveS.getValue());
+		});
+		swapsFrame.add(l);
+		swapsFrame.add(waveS);
+
+		JLabel ol = new JLabel("Offset");
+		JSpinner offsetS = new JSpinner(new SpinnerNumberModel(config.darkerWaveOffset(), 0, 32, 1));
+		offsetS.addChangeListener(e -> {
+			config.setDarkerWaveOffset((int) offsetS.getValue());
+		});
+		swapsFrame.add(ol);
+		swapsFrame.add(offsetS);
+
+		return swapsFrame;
 	}
 
 	private JPanel createRoleSwapsFrame()

@@ -303,6 +303,14 @@ public interface NyloerConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "darkerWave",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	void setDarkerWave(int v);
+
+	@ConfigItem(
 		position = 14,
 		keyName = "darkerWaveOffset",
 		name = "Darker Wave Offset",
@@ -313,6 +321,14 @@ public interface NyloerConfig extends Config
 	{
 		return 0;
 	}
+
+	@ConfigItem(
+			keyName = "darkerWaveOffset",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	void setDarkerWaveOffset(int v);
 
 	@ConfigItem(
 		position = 15,
