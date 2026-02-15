@@ -3,31 +3,41 @@ package com.nyloer;
 
 import com.nyloer.stats.Stall;
 import com.nyloer.stats.Stats;
+
+import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionListener;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import net.runelite.api.Client;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.text.JTextComponent;
-import java.awt.*;
 
 
 public class NyloerSidePanel extends PluginPanel
 {
-	private final Client client;
-	private final NyloerPlugin plugin;
-	private final NyloerConfig config;
+	@Inject
+	private Client client;
+	@Inject
+	private NyloerPlugin plugin;
+	@Inject
+	private NyloerConfig config;
+	@Inject
+	private ConfigManager configManager;
+	private final int MAX_SCALE = 5;
 
-	Font tableTitleFont;
-	Font buttonFont;
-	Font tableFont;
-	Font tableHeaderFont;
+	static final Font tableTitleFont;
+	static final Font buttonFont;
+	static final Font tableFont;
+	static final Font tableHeaderFont;
 
 	JButton buttonMageSwaps;
 	JButton buttonRangeSwaps;
@@ -42,22 +52,15 @@ public class NyloerSidePanel extends PluginPanel
 	DefaultTableModel statsTableModel;
 	JScrollBar statsTableScrollBar;
 
-	@Inject
-	NyloerSidePanel(Client client, NyloerPlugin plugin, NyloerConfig config)
-	{
-		this.client = client;
-		this.config = config;
-		this.plugin = plugin;
-		this.tableTitleFont = new Font(NyloerFonts.RUNESCAPE.toString(), Font.PLAIN, 16);
-		this.buttonFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
-		this.tableFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
-		this.tableHeaderFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
+	static {
+		tableTitleFont = new Font(NyloerFonts.RUNESCAPE.toString(), Font.PLAIN, 16);
+		buttonFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
+		tableFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
+		tableHeaderFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
 	}
 
 	public void startPanel()
 	{
-		getParent().setLayout(new BorderLayout());
-		getParent().add(this, BorderLayout.CENTER);
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -67,20 +70,19 @@ public class NyloerSidePanel extends PluginPanel
 		layout.setLayout(boxLayout);
 		add(layout, BorderLayout.NORTH);
 
-		layout.add(Box.createRigidArea(new Dimension(0, 15)));
+		layout.add(Box.createVerticalGlue());
 		JPanel swapsFrame = createRoleSwapsFrame();
 		layout.add(swapsFrame);
 
-		layout.add(Box.createRigidArea(new Dimension(0, 15)));
+		layout.add(Box.createVerticalGlue());
 		JPanel scalePane = createScalePane();
 		layout.add(scalePane);
 
-		layout.add(Box.createRigidArea(new Dimension(0, 15)));
+		layout.add(Box.createVerticalGlue());
 		JScrollPane stallsPane = createStallsPane();
 		layout.add(stallsPane);
 
-
-		layout.add(Box.createRigidArea(new Dimension(0, 15)));
+		layout.add(Box.createVerticalGlue());
 		JPanel statsPane = createRecentStatsFrame();
 		layout.add(statsPane);
 	}
@@ -127,31 +129,75 @@ public class NyloerSidePanel extends PluginPanel
 		}
 	}
 
-	private JPanel createScalePane()
-	{
-		JPanel swapsFrame = new JPanel();
-		swapsFrame.setLayout(new GridLayout(2, 2));
+	private JPanel createScalePane() {
+		JPanel swapsPanel = new JPanel(new GridLayout(0, 1, 0, 5));
 		TitledBorder border = BorderFactory.createTitledBorder(new LineBorder(Color.BLACK), "Dim Settings");
 		border.setTitleFont(tableTitleFont);
-		swapsFrame.setBorder(border);
+		swapsPanel.setBorder(border);
 
-		JLabel l = new JLabel("Darker Wave");
-		JSpinner waveS = new JSpinner(new SpinnerNumberModel(config.darkerWave(), 25, 35, 1));
-		waveS.addChangeListener(e -> {
-			config.setDarkerWave((int) waveS.getValue());
+		for (int i = 1; i <= MAX_SCALE; i++) {
+			final int scale = i;
+			JPanel scalePanel = new JPanel(new GridBagLayout());
+
+			TitledBorder scaleBorder = BorderFactory.createTitledBorder(new LineBorder(Color.GRAY), "Scale: " + scale);
+			scaleBorder.setTitleFont(tableTitleFont.deriveFont(12f));
+			scalePanel.setBorder(scaleBorder);
+
+			addConfigRow(scalePanel, 0, "Wave:", 0, 31,
+					val -> plugin.updateDarkerWave(scale, val),
+					"darkerWave" + scale,
+					() -> plugin.fetchDarkerWave(scale)
+			);
+
+			addConfigRow(scalePanel, 1, "Offset:", 0, 31,
+					val -> plugin.updateDarkerWaveOffset(scale, val),
+					"darkerWaveOffset" + scale,
+					() -> plugin.fetchDarkerWaveOffset(scale)
+			);
+
+			swapsPanel.add(scalePanel);
+		}
+		return swapsPanel;
+	}
+	private void addConfigRow(JPanel parent, int gridY, String labelText, int min, int max,
+							  IntConsumer onUpdate, String configKey, IntSupplier defaultFetcher) {
+
+		// 1. Setup Constraints
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.insets = new Insets(2, 5, 2, 5);
+		gbc.gridy = gridY;
+
+		// 2. Add Label
+		gbc.gridx = 0;
+		gbc.weightx = 0.3;
+		parent.add(new JLabel(labelText), gbc);
+
+		// 3. Create Spinner
+		JSpinner spinner = new JSpinner(new SpinnerNumberModel(defaultFetcher.getAsInt(), min, max, 1));
+		spinner.addChangeListener(e -> onUpdate.accept((int) spinner.getValue()));
+
+		// 4. Add Reset Logic
+		// We reuse your existing addReset helper, passing the specific logic for this row
+		addReset(spinner, e -> {
+			configManager.unsetConfiguration(NyloerConfig.GROUP, configKey);
+			// After unsetting, fetching again returns the default value from Config interface
+			spinner.setValue(defaultFetcher.getAsInt());
 		});
-		swapsFrame.add(l);
-		swapsFrame.add(waveS);
 
-		JLabel ol = new JLabel("Offset");
-		JSpinner offsetS = new JSpinner(new SpinnerNumberModel(config.darkerWaveOffset(), 0, 32, 1));
-		offsetS.addChangeListener(e -> {
-			config.setDarkerWaveOffset((int) offsetS.getValue());
-		});
-		swapsFrame.add(ol);
-		swapsFrame.add(offsetS);
-
-		return swapsFrame;
+		// 5. Add Spinner
+		gbc.gridx = 1;
+		gbc.weightx = 0.7;
+		parent.add(spinner, gbc);
+	}
+	private void addReset(JSpinner spinner, ActionListener listener)
+	{
+		JMenuItem resetItem = new JMenuItem("Reset to Default");
+		resetItem.addActionListener(listener);
+		JPopupMenu popup = new JPopupMenu();
+		popup.add(resetItem);
+		spinner.setComponentPopupMenu(popup);
+		((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setComponentPopupMenu(popup);
 	}
 
 	private JPanel createRoleSwapsFrame()

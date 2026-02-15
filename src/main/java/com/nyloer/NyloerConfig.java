@@ -1,6 +1,9 @@
 package com.nyloer;
 
 import java.awt.Color;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -290,45 +293,78 @@ public interface NyloerConfig extends Config
 		return Keybind.NOT_SET;
 	}
 
-	@ConfigItem(
-		position = 13,
-		keyName = "darkerWave",
-		name = "Darker Wave",
-		description = "Makes the selected wave nyloes darker, as well as the older ones.",
-		section = fontsSettings
-	)
-	default int darkerWave()
-	{
-		return 0;
-	}
+	/*
+	 * TLDR defaults:
+	 * Solo: 31
+	 * Duo: 29
+	 * Trio: 28
+	 * 4s: 27 offset 4
+	 * 5s: 26
+	 */
+	// --- Scale 1 ---
+	@ConfigItem(keyName = "darkerWave1", name = "", description = "", hidden = true)
+	default int darkerWave1() { return 31; }
 
-	@ConfigItem(
-			keyName = "darkerWave",
-			name = "",
-			description = "",
-			hidden = true
-	)
-	void setDarkerWave(int v);
+	@ConfigItem(keyName = "darkerWave1", name = "", description = "", hidden = true)
+	void setDarkerWave1(int v);
 
-	@ConfigItem(
-		position = 14,
-		keyName = "darkerWaveOffset",
-		name = "Darker Wave Offset",
-		description = "",
-		section = fontsSettings
-	)
-	default int darkerWaveOffset()
-	{
-		return 0;
-	}
+	@ConfigItem(keyName = "darkerWaveOffset1", name = "", description = "", hidden = true)
+	default int darkerWaveOffset1() { return 0; }
 
-	@ConfigItem(
-			keyName = "darkerWaveOffset",
-			name = "",
-			description = "",
-			hidden = true
-	)
-	void setDarkerWaveOffset(int v);
+	@ConfigItem(keyName = "darkerWaveOffset1", name = "", description = "", hidden = true)
+	void setDarkerWaveOffset1(int v);
+
+	// --- Scale 2 ---
+	@ConfigItem(keyName = "darkerWave2", name = "", description = "", hidden = true)
+	default int darkerWave2() { return 29; }
+
+	@ConfigItem(keyName = "darkerWave2", name = "", description = "", hidden = true)
+	void setDarkerWave2(int v);
+
+	@ConfigItem(keyName = "darkerWaveOffset2", name = "", description = "", hidden = true)
+	default int darkerWaveOffset2() { return 0; }
+
+	@ConfigItem(keyName = "darkerWaveOffset2", name = "", description = "", hidden = true)
+	void setDarkerWaveOffset2(int v);
+
+	// --- Scale 3 ---
+	@ConfigItem(keyName = "darkerWave3", name = "", description = "", hidden = true)
+	default int darkerWave3() { return 28; }
+
+	@ConfigItem(keyName = "darkerWave3", name = "", description = "", hidden = true)
+	void setDarkerWave3(int v);
+
+	@ConfigItem(keyName = "darkerWaveOffset3", name = "", description = "", hidden = true)
+	default int darkerWaveOffset3() { return 0; }
+
+	@ConfigItem(keyName = "darkerWaveOffset3", name = "", description = "", hidden = true)
+	void setDarkerWaveOffset3(int v);
+
+	// --- Scale 4 ---
+	@ConfigItem(keyName = "darkerWave4", name = "", description = "", hidden = true)
+	default int darkerWave4() { return 27; }
+
+	@ConfigItem(keyName = "darkerWave4", name = "", description = "", hidden = true)
+	void setDarkerWave4(int v);
+
+	@ConfigItem(keyName = "darkerWaveOffset4", name = "", description = "", hidden = true)
+	default int darkerWaveOffset4() { return 4; }
+
+	@ConfigItem(keyName = "darkerWaveOffset4", name = "", description = "", hidden = true)
+	void setDarkerWaveOffset4(int v);
+
+	// --- Scale 5 ---
+	@ConfigItem(keyName = "darkerWave5", name = "", description = "", hidden = true)
+	default int darkerWave5() { return 26; }
+
+	@ConfigItem(keyName = "darkerWave5", name = "", description = "", hidden = true)
+	void setDarkerWave5(int v);
+
+	@ConfigItem(keyName = "darkerWaveOffset5", name = "", description = "", hidden = true)
+	default int darkerWaveOffset5() { return 0; }
+
+	@ConfigItem(keyName = "darkerWaveOffset5", name = "", description = "", hidden = true)
+	void setDarkerWaveOffset5(int v);
 
 	@ConfigItem(
 		position = 15,

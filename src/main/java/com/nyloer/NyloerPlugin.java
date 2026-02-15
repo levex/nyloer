@@ -23,6 +23,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.gameval.VarClientID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -35,6 +36,10 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import java.awt.event.KeyEvent;
+import java.util.Objects;
+import java.util.stream.IntStream;
+
+import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +91,9 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	@Inject
 	private KeyManager keyManager;
 
+	@Inject
+	ConfigManager configManager;
+
 	public NyloerSidePanel sidePanel;
 	public NavigationButton sidePanelButton;
 
@@ -133,6 +141,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 
 	public static final Logger log = LoggerFactory.getLogger(NyloerPlugin.class);
 
+	int scale = -1;
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -194,7 +203,8 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	private void createSidePanel()
 	{
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/ico.png");
-		sidePanel = new NyloerSidePanel(client, this, config);
+		sidePanel = injector.getInstance(NyloerSidePanel.class);
+		sidePanel.startPanel();
 		sidePanelButton = NavigationButton.builder().tooltip("Nyloer").icon(icon).priority(6).panel(sidePanel).build();
 		clientToolbar.addNavigation(sidePanelButton);
 		sidePanel.startPanel();
@@ -283,9 +293,9 @@ public class NyloerPlugin extends Plugin implements KeyListener
 				{
 					w1T = client.getTickCount();
 				}
-				if (waveNumber == config.darkerWave())
+				if (waveNumber == fetchDarkerWave(scale))
 				{
-					_makeDarkerT = client.getTickCount() + config.darkerWaveOffset();
+					_makeDarkerT = client.getTickCount() + fetchDarkerWaveOffset(scale);
 				}
 			}
 			nyloers.add(nyloer);
@@ -323,12 +333,23 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		}
 	}
 
+	private int getRaidScale()
+	{
+		int count = (int) IntStream.rangeClosed(VarClientID.TOB_CLIENT_NAME0, VarClientID.TOB_CLIENT_NAME4)
+				.mapToObj(client::getVarcStrValue)
+				.filter(Objects::nonNull)
+				.filter(name -> !Text.removeFormattingTags(name).isEmpty())
+				.count();
+		return count;
+	}
+
 	private void start()
 	{
 		NyloerPlugin.log.debug("Starting Nyloer.");
 		customFontConfig.parse(config);
 		overlayManager.add(nyloerOverlay);
 		overlayManager.add(nyloerTileOverlay);
+		scale = getRaidScale();
 	}
 
 	private void stop()
@@ -338,6 +359,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		overlayManager.remove(nyloerOverlay);
 		overlayManager.remove(nyloerTileOverlay);
 		reset();
+		scale = -1;
 	}
 
 	private void reset()
@@ -567,6 +589,60 @@ public class NyloerPlugin extends Plugin implements KeyListener
 			this.updateStyle(id);
 			this.configureFonts();
 			this.size = npc.getComposition().getSize() == 1 ? "SMALL" : "BIG";
+		}
+	}
+
+	/**
+	 * Helper to fetch the darker wave threshold for a specific scale (1-5)
+	 */
+	public int fetchDarkerWave(int scale) {
+		switch (scale) {
+			case 1: return config.darkerWave1();
+			case 2: return config.darkerWave2();
+			case 3: return config.darkerWave3();
+			case 4: return config.darkerWave4();
+			case 5: return config.darkerWave5();
+			default: return 0;
+		}
+	}
+
+	/**
+	 * Helper to update the darker wave threshold for a specific scale (1-5)
+	 */
+	public void updateDarkerWave(int scale, int wave) {
+		switch (scale) {
+			case 1: config.setDarkerWave1(wave); break;
+			case 2: config.setDarkerWave2(wave); break;
+			case 3: config.setDarkerWave3(wave); break;
+			case 4: config.setDarkerWave4(wave); break;
+			case 5: config.setDarkerWave5(wave); break;
+		}
+	}
+
+	/**
+	 * Helper to fetch the darker wave offset for a specific scale (1-5)
+	 */
+	public int fetchDarkerWaveOffset(int scale) {
+		switch (scale) {
+			case 1: return config.darkerWaveOffset1();
+			case 2: return config.darkerWaveOffset2();
+			case 3: return config.darkerWaveOffset3();
+			case 4: return config.darkerWaveOffset4();
+			case 5: return config.darkerWaveOffset5();
+			default: return 0;
+		}
+	}
+
+	/**
+	 * Helper to update the darker wave offset for a specific scale (1-5)
+	 */
+	public void updateDarkerWaveOffset(int scale, int offset) {
+		switch (scale) {
+			case 1: config.setDarkerWaveOffset1(offset); break;
+			case 2: config.setDarkerWaveOffset2(offset); break;
+			case 3: config.setDarkerWaveOffset3(offset); break;
+			case 4: config.setDarkerWaveOffset4(offset); break;
+			case 5: config.setDarkerWaveOffset5(offset); break;
 		}
 	}
 }
