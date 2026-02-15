@@ -24,16 +24,20 @@ import javax.swing.border.LineBorder;
 
 public class NyloerSidePanel extends PluginPanel
 {
-	private final Client client;
-	private final NyloerPlugin plugin;
-	private final NyloerConfig config;
-	private final ConfigManager configManager;
+	@Inject
+	private Client client;
+	@Inject
+	private NyloerPlugin plugin;
+	@Inject
+	private NyloerConfig config;
+	@Inject
+	private ConfigManager configManager;
 	private final int MAX_SCALE = 5;
 
-	Font tableTitleFont;
-	Font buttonFont;
-	Font tableFont;
-	Font tableHeaderFont;
+	static final Font tableTitleFont;
+	static final Font buttonFont;
+	static final Font tableFont;
+	static final Font tableHeaderFont;
 
 	JButton buttonMageSwaps;
 	JButton buttonRangeSwaps;
@@ -48,23 +52,15 @@ public class NyloerSidePanel extends PluginPanel
 	DefaultTableModel statsTableModel;
 	JScrollBar statsTableScrollBar;
 
-	@Inject
-	NyloerSidePanel(Client client, NyloerPlugin plugin, NyloerConfig config, ConfigManager configManager)
-	{
-		this.client = client;
-		this.config = config;
-		this.plugin = plugin;
-		this.configManager = configManager;
-		this.tableTitleFont = new Font(NyloerFonts.RUNESCAPE.toString(), Font.PLAIN, 16);
-		this.buttonFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
-		this.tableFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
-		this.tableHeaderFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
+	static {
+		tableTitleFont = new Font(NyloerFonts.RUNESCAPE.toString(), Font.PLAIN, 16);
+		buttonFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
+		tableFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
+		tableHeaderFont = new Font(NyloerFonts.DIALOG.toString(), Font.PLAIN, 12);
 	}
 
 	public void startPanel()
 	{
-		getParent().setLayout(new BorderLayout());
-		getParent().add(this, BorderLayout.CENTER);
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);

@@ -24,7 +24,6 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.gameval.VarClientID;
-import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -204,7 +203,8 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	private void createSidePanel()
 	{
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/ico.png");
-		sidePanel = new NyloerSidePanel(client, this, config, configManager);
+		sidePanel = injector.getInstance(NyloerSidePanel.class);
+		sidePanel.startPanel();
 		sidePanelButton = NavigationButton.builder().tooltip("Nyloer").icon(icon).priority(6).panel(sidePanel).build();
 		clientToolbar.addNavigation(sidePanelButton);
 		sidePanel.startPanel();
