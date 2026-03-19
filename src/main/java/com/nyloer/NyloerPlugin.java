@@ -76,13 +76,15 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	@Getter private boolean isNylocasRegionLast;
 	@Getter private boolean pillarsSpawned;
 	@Getter private int wave1Tick;
-	@Getter private int makeDarkerT;
 	@Getter private int waveNumber;
 	@Getter private int nylocasAliveCount;
 	@Getter private final List<NyloerNpc> nyloers = new ArrayList<>();
 	@Getter private final Map<Integer, NyloerNpc> nyloersIndexMap = new HashMap<>();
+	/** Each rule: {tickThreshold, dimSmalls(1/0), dimBigs(1/0)}. A nylo is dimmed if its spawnTick <= tickThreshold and its size bit is set. */
+	@Getter private final List<int[]> activeDimRules = new ArrayList<>();
 
-	private final List<int[]> pendingDarkerEvents = new ArrayList<>(); // {fireAtTick, dimWave, dimOffset}
+	/** Each entry: {fireAtTick, dimWave, dimOffset, dimSmalls(1/0), dimBigs(1/0)} */
+	private final List<int[]> pendingDarkerEvents = new ArrayList<>();
 	private final Map<Integer, Integer> waveSpawnTicks = new HashMap<>();
 	private int lastWaveTickSpawned;
 
@@ -131,7 +133,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		log.debug("Resetting Nyloer.");
 		waveNumber = 0;
 		nylocasAliveCount = 0;
-		makeDarkerT = 0;
+		activeDimRules.clear();
 		pendingDarkerEvents.clear();
 		waveSpawnTicks.clear();
 		pillarsSpawned = false;
@@ -167,8 +169,9 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	{
 		if (config.makeDarkerHotkey().matches(e))
 		{
-			makeDarkerT = client.getTickCount() - 1;
-			makeDarkerT -= (makeDarkerT - wave1Tick) % 4;
+			int t = client.getTickCount() - 1;
+			t -= (t - wave1Tick) % 4;
+			activeDimRules.add(new int[]{t, 1, 1});
 		}
 	}
 
@@ -298,10 +301,16 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		int spawnTick = client.getTickCount();
 		for (DarkerEntry entry : DarkerEntry.parseAll(config.darkerEntries()))
 		{
-			// First two columns select which nylos are dimmed; third/fourth decide execution tick.
+			// triggerWave/triggerOffset decide when to execute; wave/offset select which nylos are dimmed.
 			if (entry.triggerWave == waveNumber)
 			{
-				pendingDarkerEvents.add(new int[]{spawnTick + entry.triggerOffset, entry.wave, entry.offset});
+				pendingDarkerEvents.add(new int[]{
+					spawnTick + entry.triggerOffset,
+					entry.wave,
+					entry.offset,
+					entry.dimSmalls ? 1 : 0,
+					entry.dimBigs ? 1 : 0
+				});
 			}
 		}
 	}
@@ -319,7 +328,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 			{
 				return false; // dim wave hasn't spawned yet — keep waiting
 			}
-			makeDarkerT = Math.max(makeDarkerT, dimSpawnTick + event[2]);
+			activeDimRules.add(new int[]{dimSpawnTick + event[2], event[3], event[4]});
 			return true;
 		});
 	}

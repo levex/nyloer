@@ -133,7 +133,7 @@ public class NyloerSidePanel extends PluginPanel
 	private JPanel createMakeDarkerFrame()
 	{
 		JPanel frame = new JPanel();
-		TitledBorder border = BorderFactory.createTitledBorder(new LineBorder(Color.BLACK), "Make Darker");
+		TitledBorder border = BorderFactory.createTitledBorder(new LineBorder(Color.BLACK), "Dim");
 		border.setTitleFont(tableTitleFont);
 		frame.setBorder(border);
 		frame.setLayout(new BoxLayout(frame, BoxLayout.Y_AXIS));

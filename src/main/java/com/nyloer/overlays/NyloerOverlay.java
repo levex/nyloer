@@ -3,6 +3,7 @@ package com.nyloer.overlays;
 import com.google.common.collect.ArrayListMultimap;
 import com.nyloer.NyloerConfig;
 import com.nyloer.NyloerPlugin;
+import com.nyloer.npc.NyloSize;
 import com.nyloer.npc.NyloerNpc;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -72,6 +73,24 @@ public class NyloerOverlay extends Overlay
 		return null;
 	}
 
+	private boolean shouldDim(NyloerNpc nyloer)
+	{
+		if (nyloer.isColorDarker())
+		{
+			return true;
+		}
+		for (int[] rule : plugin.getActiveDimRules())
+		{
+			boolean sizeMatch = (nyloer.getSize() == NyloSize.SMALL && rule[1] == 1)
+				|| (nyloer.getSize() == NyloSize.BIG && rule[2] == 1);
+			if (sizeMatch && nyloer.getTickSpawned() <= rule[0])
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void draw(Graphics2D graphics, NyloerNpc nyloer, int offset)
 	{
 		String prefix;
@@ -113,7 +132,7 @@ public class NyloerOverlay extends Overlay
 			});
 		});
 		Color color = nyloer.getColor();
-		if ((nyloer.getTickSpawned() <= plugin.getMakeDarkerT()) || (nyloer.isColorDarker()))
+		if (shouldDim(nyloer))
 		{
 			color = color.darker().darker();
 		}

@@ -21,19 +21,28 @@ public class DarkerEntry
 	public final int triggerWave;
 	public final int triggerOffset;
 	public final boolean executionOverride;
+	public final boolean dimSmalls;
+	public final boolean dimBigs;
 
 	public DarkerEntry(int wave, int offset, int triggerWave, int triggerOffset)
 	{
-		this(wave, offset, triggerWave, triggerOffset, true);
+		this(wave, offset, triggerWave, triggerOffset, true, true, true);
 	}
 
 	public DarkerEntry(int wave, int offset, int triggerWave, int triggerOffset, boolean executionOverride)
+	{
+		this(wave, offset, triggerWave, triggerOffset, executionOverride, true, true);
+	}
+
+	public DarkerEntry(int wave, int offset, int triggerWave, int triggerOffset, boolean executionOverride, boolean dimSmalls, boolean dimBigs)
 	{
 		this.wave = wave;
 		this.offset = offset;
 		this.triggerWave = triggerWave;
 		this.triggerOffset = triggerOffset;
 		this.executionOverride = executionOverride;
+		this.dimSmalls = dimSmalls;
+		this.dimBigs = dimBigs;
 	}
 
 	/** Parses a comma-separated list of {@code wave:offset} or {@code wave:offset:triggerWave:triggerOffset} tokens. */
@@ -59,7 +68,9 @@ public class DarkerEntry
 				boolean hasExecutionOverride = t.length >= 4;
 				int triggerWave   = hasExecutionOverride ? Integer.parseInt(t[2].trim()) : wave;
 				int triggerOffset = hasExecutionOverride ? Integer.parseInt(t[3].trim()) : offset;
-				entries.add(new DarkerEntry(wave, offset, triggerWave, triggerOffset, hasExecutionOverride));
+				boolean dimSmalls = t.length < 5 || !t[4].trim().equals("0");
+				boolean dimBigs   = t.length < 6 || !t[5].trim().equals("0");
+				entries.add(new DarkerEntry(wave, offset, triggerWave, triggerOffset, hasExecutionOverride, dimSmalls, dimBigs));
 			}
 			catch (Exception e)
 			{
@@ -72,10 +83,19 @@ public class DarkerEntry
 	@Override
 	public String toString()
 	{
-		if (!executionOverride)
+		if (dimSmalls && dimBigs)
 		{
-			return wave + ":" + offset;
+			if (!executionOverride)
+			{
+				return wave + ":" + offset;
+			}
+			return wave + ":" + offset + ":" + triggerWave + ":" + triggerOffset;
 		}
-		return wave + ":" + offset + ":" + triggerWave + ":" + triggerOffset;
+		// Include trigger fields (indices 2-3) to reach dim fields at indices 4-5
+		int tw = executionOverride ? triggerWave : wave;
+		int to = executionOverride ? triggerOffset : offset;
+		return wave + ":" + offset + ":" + tw + ":" + to
+			+ ":" + (dimSmalls ? "1" : "0")
+			+ ":" + (dimBigs ? "1" : "0");
 	}
 }
