@@ -292,28 +292,61 @@ public interface NyloerConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 13,
-		keyName = "darkerWave",
-		name = "Darker Wave",
-		description = "Makes the selected wave nyloes darker, as well as the older ones.",
-		section = fontsSettings
+		keyName = "darkerEntries",
+		name = "",
+		description = "",
+		hidden = true
 	)
-	default int darkerWave()
+	default String darkerEntries()
 	{
-		return 0;
+		return "";
 	}
 
 	@ConfigItem(
-		position = 14,
-		keyName = "darkerWaveOffset",
-		name = "Darker Wave Offset",
+		keyName = "darkerEntries",
+		name = "",
 		description = "",
-		section = fontsSettings
+		hidden = true
 	)
-	default int darkerWaveOffset()
+	void setDarkerEntries(String entries);
+
+	@ConfigItem(
+		keyName = "darkerPresets",
+		name = "",
+		description = "",
+		hidden = true
+	)
+	default String darkerPresets()
 	{
-		return 0;
+		return "";
 	}
+
+	@ConfigItem(
+		keyName = "darkerPresets",
+		name = "",
+		description = "",
+		hidden = true
+	)
+	void setDarkerPresets(String presets);
+
+	@ConfigItem(
+		keyName = "selectedDarkerPreset",
+		name = "",
+		description = "",
+		hidden = true
+	)
+	default String selectedDarkerPreset()
+	{
+		return "";
+	}
+
+	@ConfigItem(
+		keyName = "selectedDarkerPreset",
+		name = "",
+		description = "",
+		hidden = true
+	)
+	void setSelectedDarkerPreset(String presetName);
 
 	@ConfigItem(
 		position = 15,

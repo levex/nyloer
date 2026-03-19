@@ -1,6 +1,7 @@
 package com.nyloer;
 
 import com.google.inject.Provides;
+import com.nyloer.ui.DarkerEntry;
 import com.nyloer.fonts.CustomFontConfig;
 import com.nyloer.npc.NyloType;
 import com.nyloer.npc.NyloerNpc;
@@ -81,7 +82,8 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	@Getter private final List<NyloerNpc> nyloers = new ArrayList<>();
 	@Getter private final Map<Integer, NyloerNpc> nyloersIndexMap = new HashMap<>();
 
-	private int pendingDarkerTick;
+	private final List<int[]> pendingDarkerEvents = new ArrayList<>(); // {fireAtTick, dimWave, dimOffset}
+	private final Map<Integer, Integer> waveSpawnTicks = new HashMap<>();
 	private int lastWaveTickSpawned;
 
 	// ---- lifecycle
@@ -129,7 +131,9 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		log.debug("Resetting Nyloer.");
 		waveNumber = 0;
 		nylocasAliveCount = 0;
-		pendingDarkerTick = 0;
+		makeDarkerT = 0;
+		pendingDarkerEvents.clear();
+		waveSpawnTicks.clear();
 		pillarsSpawned = false;
 		nyloers.clear();
 		nyloerOverlay.nyloers.clear();
@@ -216,7 +220,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 			return;
 		}
 
-		commitPendingDarkerTick();
+		processDarkerEvents();
 		tickNyloers();
 	}
 
@@ -289,12 +293,35 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		}
 	}
 
-	private void commitPendingDarkerTick()
+	private void scheduleDarkerEvents()
 	{
-		if (client.getTickCount() == pendingDarkerTick)
+		int spawnTick = client.getTickCount();
+		for (DarkerEntry entry : DarkerEntry.parseAll(config.darkerEntries()))
 		{
-			makeDarkerT = pendingDarkerTick;
+			// First two columns select which nylos are dimmed; third/fourth decide execution tick.
+			if (entry.triggerWave == waveNumber)
+			{
+				pendingDarkerEvents.add(new int[]{spawnTick + entry.triggerOffset, entry.wave, entry.offset});
+			}
 		}
+	}
+
+	private void processDarkerEvents()
+	{
+		pendingDarkerEvents.removeIf(event ->
+		{
+			if (client.getTickCount() < event[0])
+			{
+				return false;
+			}
+			Integer dimSpawnTick = waveSpawnTicks.get(event[1]);
+			if (dimSpawnTick == null)
+			{
+				return false; // dim wave hasn't spawned yet — keep waiting
+			}
+			makeDarkerT = Math.max(makeDarkerT, dimSpawnTick + event[2]);
+			return true;
+		});
 	}
 
 	private void tickNyloers()
@@ -336,14 +363,12 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		lastWaveTickSpawned = client.getTickCount();
 		++waveNumber;
 		nyloer.bumpWave();
+		waveSpawnTicks.put(waveNumber, client.getTickCount());
 		if (waveNumber == 1)
 		{
 			wave1Tick = client.getTickCount();
 		}
-		if (waveNumber == config.darkerWave())
-		{
-			pendingDarkerTick = client.getTickCount() + config.darkerWaveOffset();
-		}
+		scheduleDarkerEvents();
 	}
 
 	private void removeNyloer(NPC npc)

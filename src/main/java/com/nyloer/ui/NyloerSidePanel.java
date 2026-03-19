@@ -12,17 +12,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.datatransfer.StringSelection;
+import java.util.List;
 import javax.inject.Inject;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JScrollBar;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -41,6 +35,7 @@ public class NyloerSidePanel extends PluginPanel
 	Font buttonFont;
 	Font tableFont;
 	Font tableHeaderFont;
+	private JComboBox<String> darkerPresetCombo;
 
 	JButton buttonMageSwaps;
 	JButton buttonRangeSwaps;
@@ -81,16 +76,16 @@ public class NyloerSidePanel extends PluginPanel
 		add(layout, BorderLayout.NORTH);
 
 		layout.add(Box.createRigidArea(new Dimension(0, 15)));
-		JPanel swapsFrame = createRoleSwapsFrame();
-		layout.add(swapsFrame);
+		layout.add(createRoleSwapsFrame());
 
 		layout.add(Box.createRigidArea(new Dimension(0, 15)));
-		JScrollPane stallsPane = createStallsPane();
-		layout.add(stallsPane);
+		layout.add(createMakeDarkerFrame());
 
 		layout.add(Box.createRigidArea(new Dimension(0, 15)));
-		JPanel statsPane = createRecentStatsFrame();
-		layout.add(statsPane);
+		layout.add(createStallsPane());
+
+		layout.add(Box.createRigidArea(new Dimension(0, 15)));
+		layout.add(createRecentStatsFrame());
 	}
 
 	public void addStall(Stall stall)
@@ -133,6 +128,93 @@ public class NyloerSidePanel extends PluginPanel
 				stallsTableModel.removeRow(i);
 			}
 		}
+	}
+
+	private JPanel createMakeDarkerFrame()
+	{
+		JPanel frame = new JPanel();
+		TitledBorder border = BorderFactory.createTitledBorder(new LineBorder(Color.BLACK), "Make Darker");
+		border.setTitleFont(tableTitleFont);
+		frame.setBorder(border);
+		frame.setLayout(new BoxLayout(frame, BoxLayout.Y_AXIS));
+
+		darkerPresetCombo = new JComboBox<>();
+		darkerPresetCombo.setFont(buttonFont);
+		refreshPresetCombo();
+		darkerPresetCombo.addActionListener(e ->
+		{
+			int idx = darkerPresetCombo.getSelectedIndex();
+			if (idx <= 0)
+			{
+				config.setSelectedDarkerPreset("");
+				return;
+			}
+			List<DarkerPreset> presets = DarkerPreset.parseAll(config.darkerPresets());
+			if (idx - 1 < presets.size())
+			{
+				DarkerPreset preset = presets.get(idx - 1);
+				config.setDarkerEntries(preset.entriesString());
+				config.setSelectedDarkerPreset(preset.name);
+			}
+		});
+
+		JButton configureBtn = new JButton("\u2699");
+		configureBtn.setToolTipText("Configure presets");
+		configureBtn.setFont(buttonFont);
+		configureBtn.setFocusable(false);
+		configureBtn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		configureBtn.addActionListener(e -> openPresetsDialog());
+
+		JPanel controls = new JPanel(new BorderLayout(4, 0));
+		controls.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		controls.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+		controls.add(darkerPresetCombo, BorderLayout.CENTER);
+		controls.add(configureBtn, BorderLayout.EAST);
+		frame.add(controls);
+
+		return frame;
+	}
+
+	private void refreshPresetCombo()
+	{
+		if (darkerPresetCombo == null)
+		{
+			return;
+		}
+		String selectedPreset = config.selectedDarkerPreset();
+		darkerPresetCombo.removeAllItems();
+		darkerPresetCombo.addItem("Select preset...");
+		int selectedIndex = 0;
+		int index = 1;
+		for (DarkerPreset preset : DarkerPreset.parseAll(config.darkerPresets()))
+		{
+			darkerPresetCombo.addItem(preset.name);
+			if (!selectedPreset.isBlank() && selectedPreset.equals(preset.name))
+			{
+				selectedIndex = index;
+			}
+			index++;
+		}
+		if (selectedIndex == 0 && !selectedPreset.isBlank())
+		{
+			config.setSelectedDarkerPreset("");
+		}
+		darkerPresetCombo.setSelectedIndex(selectedIndex);
+	}
+
+	private void openPresetsDialog()
+	{
+		Window owner = SwingUtilities.getWindowAncestor(this);
+		DarkerPresetsDialog dialog = new DarkerPresetsDialog(owner, config);
+		dialog.addWindowListener(new java.awt.event.WindowAdapter()
+		{
+			@Override
+			public void windowClosed(java.awt.event.WindowEvent e)
+			{
+				refreshPresetCombo();
+			}
+		});
+		dialog.setVisible(true);
 	}
 
 	private JPanel createRoleSwapsFrame()
