@@ -1,21 +1,35 @@
-package com.nyloer;
+package com.nyloer.ui;
 
-
+import com.nyloer.NyloerConfig;
+import com.nyloer.NyloerPlugin;
+import com.nyloer.fonts.NyloerFonts;
 import com.nyloer.stats.Stall;
 import com.nyloer.stats.Stats;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import javax.inject.Inject;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JScrollBar;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import net.runelite.api.Client;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
-
-import javax.inject.Inject;
-import javax.swing.*;
-import javax.swing.border.LineBorder;
-import java.awt.*;
-
 
 public class NyloerSidePanel extends PluginPanel
 {
@@ -42,7 +56,7 @@ public class NyloerSidePanel extends PluginPanel
 	JScrollBar statsTableScrollBar;
 
 	@Inject
-	NyloerSidePanel(Client client, NyloerPlugin plugin, NyloerConfig config)
+	public NyloerSidePanel(Client client, NyloerPlugin plugin, NyloerConfig config)
 	{
 		this.client = client;
 		this.config = config;

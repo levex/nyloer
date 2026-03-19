@@ -3,6 +3,7 @@ package com.nyloer.overlays;
 import com.google.common.collect.ArrayListMultimap;
 import com.nyloer.NyloerConfig;
 import com.nyloer.NyloerPlugin;
+import com.nyloer.npc.NyloerNpc;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -19,7 +20,7 @@ import net.runelite.client.ui.overlay.OverlayPriority;
 
 public class NyloerOverlay extends Overlay
 {
-	public ArrayListMultimap<WorldPoint, NyloerPlugin.NyloerNpc> nyloers;
+	public ArrayListMultimap<WorldPoint, NyloerNpc> nyloers;
 	private final NyloerConfig config;
 	private final NyloerPlugin plugin;
 	private final NpcUtil npcUtil;
@@ -48,7 +49,7 @@ public class NyloerOverlay extends Overlay
 		int length = this.plugin.getNyloers().size();
 		for (int i = length - 1; i >= 0; i--)
 		{
-			NyloerPlugin.NyloerNpc nyloer = this.plugin.getNyloers().get(i);
+			NyloerNpc nyloer = this.plugin.getNyloers().get(i);
 			if (nyloer.isAlive() && !npcUtil.isDying(nyloer.getNpc()))
 			{
 				nyloers.put(nyloer.getNpc().getWorldLocation(), nyloer);
@@ -60,7 +61,7 @@ public class NyloerOverlay extends Overlay
 			nyloers.asMap().forEach(
 				(worldPoint, npcs) -> {
 					int offset = 0;
-					for (NyloerPlugin.NyloerNpc nyloer : npcs)
+					for (NyloerNpc nyloer : npcs)
 					{
 						graphics.setFont(nyloer.getFont());
 						this.draw(graphics, nyloer, offset);
@@ -71,7 +72,7 @@ public class NyloerOverlay extends Overlay
 		return null;
 	}
 
-	private void draw(Graphics2D graphics, NyloerPlugin.NyloerNpc nyloer, int offset)
+	private void draw(Graphics2D graphics, NyloerNpc nyloer, int offset)
 	{
 		String prefix;
 		String text;
@@ -112,7 +113,7 @@ public class NyloerOverlay extends Overlay
 			});
 		});
 		Color color = nyloer.getColor();
-		if ((nyloer.getTickSpawned() <= plugin.makeDarkerT) || (nyloer.isColorDarker()))
+		if ((nyloer.getTickSpawned() <= plugin.getMakeDarkerT()) || (nyloer.isColorDarker()))
 		{
 			color = color.darker().darker();
 		}

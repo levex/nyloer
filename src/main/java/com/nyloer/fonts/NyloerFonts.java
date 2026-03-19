@@ -1,4 +1,4 @@
-package com.nyloer;
+package com.nyloer.fonts;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

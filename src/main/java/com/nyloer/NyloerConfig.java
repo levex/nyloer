@@ -1,5 +1,6 @@
 package com.nyloer;
 
+import com.nyloer.fonts.NyloerFonts;
 import java.awt.Color;
 import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
