@@ -2,6 +2,8 @@ package com.nyloer.stats;
 
 import com.nyloer.NyloerConfig;
 import com.nyloer.NyloerPlugin;
+import com.nyloer.npc.NyloSize;
+import com.nyloer.npc.NyloerNpc;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -125,7 +127,7 @@ public class StatsHandler
 	public void onNpcSpawned(NpcSpawned npcSpawned)
 	{
 		NPC npc = npcSpawned.getNpc();
-		NyloerPlugin.NyloerNpc nyloer = plugin.getNyloersIndexMap().get(npc.getIndex());
+		NyloerNpc nyloer = plugin.getNyloersIndexMap().get(npc.getIndex());
 		if (nyloer != null)
 		{
 			if ((!nyloer.isSplit()) && (ticksSinceLastWave > 3))
@@ -346,9 +348,9 @@ public class StatsHandler
 	private int getBigsAliveCount()
 	{
 		int bigsAliveCount = 0;
-		for (NyloerPlugin.NyloerNpc nyloer : plugin.getNyloersIndexMap().values())
+		for (NyloerNpc nyloer : plugin.getNyloersIndexMap().values())
 		{
-			if (nyloer.getSize().equals("BIG"))
+			if (nyloer.getSize() == NyloSize.BIG)
 			{
 				bigsAliveCount++;
 			}

@@ -1,17 +1,17 @@
-package com.nyloer;
+package com.nyloer.fonts;
 
+import com.nyloer.NyloerConfig;
+import java.awt.Color;
 import java.util.HashMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.Text;
 
-import java.awt.Color;
-
-
 @Slf4j
 public class CustomFontConfig
 {
 	private static final CustomFontConfig INSTANCE = new CustomFontConfig();
+
 	@Getter
 	private final HashMap<String, Color> colorSettings = new HashMap<>();
 
