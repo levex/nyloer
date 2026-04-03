@@ -112,10 +112,6 @@ public class NyloerNpc
 		{
 			color = customColor;
 		}
-		if (colorDarker)
-		{
-			color = color.darker().darker();
-		}
 	}
 
 	private void configureFonts()

@@ -418,6 +418,7 @@ public class DarkerPresetsDialog extends JDialog
 		fieldsPanel.add(waveSpinner);
 		fieldsPanel.add(offsetSpinner);
 		fieldsPanel.add(buildExecutionCell(entryRow));
+		entryRow.fieldsPanel = fieldsPanel;
 		contentRow.add(fieldsPanel, BorderLayout.CENTER);
 
 		JPanel eastContent = new JPanel();
@@ -522,10 +523,10 @@ public class DarkerPresetsDialog extends JDialog
 
 	private void replaceExecutionCell(DarkerEntryRow row)
 	{
-		row.rowPanel.remove(2);
-		row.rowPanel.add(buildExecutionCell(row), 2);
-		row.rowPanel.revalidate();
-		row.rowPanel.repaint();
+		row.fieldsPanel.remove(2);
+		row.fieldsPanel.add(buildExecutionCell(row), 2);
+		row.fieldsPanel.revalidate();
+		row.fieldsPanel.repaint();
 	}
 
 	private void addNewPreset()
@@ -667,6 +668,7 @@ public class DarkerPresetsDialog extends JDialog
 		private final JCheckBox dimSmallsCheck;
 		private final JCheckBox dimBigsCheck;
 		private JPanel rowPanel;
+		private JPanel fieldsPanel;
 
 		private DarkerEntryRow(JSpinner waveSpinner, JSpinner offsetSpinner, JSpinner triggerWaveSpinner, JSpinner triggerOffsetSpinner, boolean executionOverride, JCheckBox dimSmallsCheck, JCheckBox dimBigsCheck)
 		{
