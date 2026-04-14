@@ -8,7 +8,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -137,20 +139,26 @@ public class DarkerPresetsDialog extends JDialog
 		styleScrollPane(listScroll, ColorScheme.DARKER_GRAY_COLOR);
 		panel.add(listScroll, BorderLayout.CENTER);
 
-		JPanel btnPanel = new JPanel(new GridLayout(2, 2, 2, 2));
+		JPanel btnPanel = new JPanel(new GridLayout(3, 2, 2, 2));
 		btnPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		JButton addBtn = makeButton("+ New");
 		JButton dupBtn = makeButton("Duplicate");
 		JButton renBtn = makeButton("Rename");
 		JButton delBtn = makeButton("Delete");
+		JButton exportBtn = makeButton("Export");
+		JButton importBtn = makeButton("Import");
 		addBtn.addActionListener(e -> addNewPreset());
 		dupBtn.addActionListener(e -> duplicateSelectedPreset());
 		renBtn.addActionListener(e -> renameSelectedPreset());
 		delBtn.addActionListener(e -> deleteSelectedPreset());
+		exportBtn.addActionListener(e -> exportSelectedPreset());
+		importBtn.addActionListener(e -> importPreset());
 		btnPanel.add(addBtn);
 		btnPanel.add(dupBtn);
 		btnPanel.add(renBtn);
 		btnPanel.add(delBtn);
+		btnPanel.add(exportBtn);
+		btnPanel.add(importBtn);
 		panel.add(btnPanel, BorderLayout.SOUTH);
 
 		return panel;
@@ -622,6 +630,68 @@ public class DarkerPresetsDialog extends JDialog
 			copiedEntries.add(new DarkerEntry(e.wave, e.offset, e.triggerWave, e.triggerOffset, e.executionOverride, e.dimSmalls, e.dimBigs));
 		}
 		presets.add(new DarkerPreset(name, copiedEntries));
+		refreshListModel();
+		persistPresets();
+		int newIdx = presets.size() - 1;
+		presetList.setSelectedIndex(newIdx);
+		selectPreset(newIdx);
+	}
+
+	private void exportSelectedPreset()
+	{
+		int idx = presetList.getSelectedIndex();
+		if (idx < 0 || idx >= presets.size())
+		{
+			return;
+		}
+		persistCurrentPreset();
+		String payload = presets.get(idx).entriesString();
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(payload), null);
+		JOptionPane.showMessageDialog(this,
+			"Preset copied to clipboard:\n\n" + payload,
+			"Export preset",
+			JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	private void importPreset()
+	{
+		String payload = JOptionPane.showInputDialog(this,
+			"Paste exported preset string:",
+			"Import preset",
+			JOptionPane.PLAIN_MESSAGE);
+		if (payload == null)
+		{
+			return;
+		}
+		payload = payload.trim();
+		if (payload.isEmpty())
+		{
+			return;
+		}
+		List<DarkerEntry> entries = DarkerEntry.parseAll(payload);
+		if (entries.isEmpty())
+		{
+			JOptionPane.showMessageDialog(this,
+				"No valid entries found in the pasted string.",
+				"Import preset",
+				JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		String name = JOptionPane.showInputDialog(this, "Preset name:", "Imported Preset", JOptionPane.PLAIN_MESSAGE);
+		if (name == null)
+		{
+			return;
+		}
+		name = name.trim();
+		if (name.isEmpty())
+		{
+			return;
+		}
+		if (selectedIndex >= 0 && selectedIndex < presets.size())
+		{
+			persistCurrentPreset();
+		}
+		presets.add(new DarkerPreset(name, entries));
 		refreshListModel();
 		persistPresets();
 		int newIdx = presets.size() - 1;
