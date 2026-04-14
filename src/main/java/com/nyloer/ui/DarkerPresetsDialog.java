@@ -169,7 +169,8 @@ public class DarkerPresetsDialog extends JDialog
 			+ "Off = dim wave offset.<br>"
 			+ "Adjust = optional execution tick override.<br>"
 			+ "In Adjust, first value is execution wave and second value is execution wave offset.<br>"
-			+ "Smalls/Bigs = whether this dim applies to small/big nylos.</html>");
+			+ "Smalls/Bigs = whether this dim applies to small/big nylos.<br>"
+			+ "<i>10 dims max</i></html>");
 		helpLabel.setFont(buttonFont);
 		helpLabel.setForeground(Color.LIGHT_GRAY);
 		panel.add(helpLabel, BorderLayout.NORTH);
