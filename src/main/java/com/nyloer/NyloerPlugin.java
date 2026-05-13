@@ -199,6 +199,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	{
 		log.debug("Resetting Nyloer.");
 		waveNumber = 0;
+		lastWaveTickSpawned = 0;
 		nylocasAliveCount = 0;
 		activeDimRules.clear();
 		pendingDarkerEvents.clear();
@@ -532,7 +533,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	private void registerNyloer(NPC npc)
 	{
 		NyloerNpc nyloer = new NyloerNpc(npc, client, config, customFontConfig, waveNumber, lastWaveTickSpawned);
-		if (!nyloer.getSpawn().equals("SPLIT") && lastWaveTickSpawned != client.getTickCount())
+		if (!nyloer.getSpawn().equals("SPLIT") && client.getTickCount() - lastWaveTickSpawned > 3)
 		{
 			handleNewWave(nyloer);
 		}
