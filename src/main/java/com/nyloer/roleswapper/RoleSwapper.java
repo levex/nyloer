@@ -70,11 +70,13 @@ public class RoleSwapper
 	final List<CustomSwap> rangeSwaps = new ArrayList<>();
 	final List<CustomSwap> meleeSwaps = new ArrayList<>();
 	final List<CustomSwap> customSwaps = new ArrayList<>();
+	final List<CustomSwap> duoMageSwaps = new ArrayList<>();
 
 	final List<CustomSwap> mageShiftSwaps = new ArrayList<>();
 	final List<CustomSwap> rangeShiftSwaps = new ArrayList<>();
 	final List<CustomSwap> meleeShiftSwaps = new ArrayList<>();
 	final List<CustomSwap> customShiftSwaps = new ArrayList<>();
+	final List<CustomSwap> duoMageShiftSwaps = new ArrayList<>();
 
 	@Inject
 	protected RoleSwapper(NyloerPlugin plugin, NyloerConfig config)
@@ -106,6 +108,8 @@ public class RoleSwapper
 		meleeShiftSwaps.addAll(loadConfigSwaps(config.meleeRoleShiftSwaps(), true));
 		customSwaps.addAll(loadConfigSwaps(config.customRoleSwaps(), false));
 		customShiftSwaps.addAll(loadConfigSwaps(config.customRoleShiftSwaps(), true));
+		duoMageSwaps.addAll(loadConfigSwaps(config.duoMageRoleSwaps(), false));
+		duoMageShiftSwaps.addAll(loadConfigSwaps(config.duoMageRoleShiftSwaps(), true));
 	}
 
 	private void clearSwaps()
@@ -118,6 +122,8 @@ public class RoleSwapper
 		meleeShiftSwaps.clear();
 		customSwaps.clear();
 		customShiftSwaps.clear();
+		duoMageSwaps.clear();
+		duoMageShiftSwaps.clear();
 	}
 
 	private Collection<? extends CustomSwap> loadConfigSwaps(String customSwaps, boolean shiftSwaps)
@@ -202,6 +208,8 @@ public class RoleSwapper
 					return meleeShiftSwaps;
 				case "custom":
 					return customShiftSwaps;
+				case "duomage":
+					return duoMageShiftSwaps;
 			}
 		}
 		else
@@ -216,6 +224,8 @@ public class RoleSwapper
 					return meleeSwaps;
 				case "custom":
 					return customSwaps;
+				case "duomage":
+					return duoMageSwaps;
 			}
 		}
 		return null;

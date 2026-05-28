@@ -41,6 +41,7 @@ public class NyloerSidePanel extends PluginPanel
 	JButton buttonRangeSwaps;
 	JButton buttonMeleeSwaps;
 	JButton buttonCustomSwaps;
+	JButton buttonDuoMageSwaps;
 
 	JTable stallsTable;
 	DefaultTableModel stallsTableModel;
@@ -220,7 +221,7 @@ public class NyloerSidePanel extends PluginPanel
 	private JPanel createRoleSwapsFrame()
 	{
 		JPanel swapsFrame = new JPanel();
-		swapsFrame.setLayout(new GridLayout(2, 2));
+		swapsFrame.setLayout(new GridLayout(3, 2));
 		TitledBorder border = BorderFactory.createTitledBorder(new LineBorder(Color.BLACK), "Role Swaps");
 		border.setTitleFont(tableTitleFont);
 		swapsFrame.setBorder(border);
@@ -229,26 +230,32 @@ public class NyloerSidePanel extends PluginPanel
 		buttonRangeSwaps = new JButton("Range");
 		buttonMeleeSwaps = new JButton("Melee");
 		buttonCustomSwaps = new JButton("Custom");
+		buttonDuoMageSwaps = new JButton("Duo Mage");
 		buttonMageSwaps.setPreferredSize(new Dimension(40, 40));
 		buttonRangeSwaps.setPreferredSize(new Dimension(40, 40));
 		buttonMeleeSwaps.setPreferredSize(new Dimension(40, 40));
 		buttonCustomSwaps.setPreferredSize(new Dimension(40, 40));
+		buttonDuoMageSwaps.setPreferredSize(new Dimension(40, 40));
 		buttonMageSwaps.setFocusable(false);
 		buttonRangeSwaps.setFocusable(false);
 		buttonMeleeSwaps.setFocusable(false);
 		buttonCustomSwaps.setFocusable(false);
+		buttonDuoMageSwaps.setFocusable(false);
 		buttonMageSwaps.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		buttonRangeSwaps.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		buttonMeleeSwaps.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		buttonCustomSwaps.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		buttonDuoMageSwaps.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		buttonMageSwaps.addActionListener(e -> _configureMageSwaps());
 		buttonRangeSwaps.addActionListener(e -> _configureRangeSwaps());
 		buttonMeleeSwaps.addActionListener(e -> _configureMeleeSwaps());
 		buttonCustomSwaps.addActionListener(e -> _configureCustomSwaps());
+		buttonDuoMageSwaps.addActionListener(e -> _configureDuoMageSwaps());
 		swapsFrame.add(buttonMageSwaps);
 		swapsFrame.add(buttonMeleeSwaps);
 		swapsFrame.add(buttonRangeSwaps);
 		swapsFrame.add(buttonCustomSwaps);
+		swapsFrame.add(buttonDuoMageSwaps);
 		switch (config.previousRole())
 		{
 			case "mage":
@@ -262,6 +269,9 @@ public class NyloerSidePanel extends PluginPanel
 				break;
 			case "custom":
 				_configureCustomSwaps();
+				break;
+			case "duomage":
+				_configureDuoMageSwaps();
 				break;
 			default:
 				_resetRolesSelection();
@@ -508,6 +518,24 @@ public class NyloerSidePanel extends PluginPanel
 		}
 	}
 
+	private void _configureDuoMageSwaps()
+	{
+		NyloerPlugin.log.debug("Configuring duo mage swaps.");
+		String currentRole = plugin.roleSwapper.getCurrentRole();
+		_resetRolesSelection();
+		if ((currentRole == null) || (!currentRole.equals("duomage")))
+		{
+			config.setPreviousRole("duomage");
+			plugin.roleSwapper.setCurrentRole("duomage");
+			plugin.nyloerTileOverlay.setRenderMage(config.duoMageHighlightMageTiles());
+			plugin.nyloerTileOverlay.setRenderRange(config.duoMageHighlightRangeTiles());
+			plugin.nyloerTileOverlay.setRenderMelee(config.duoMageHighlightMeleeTiles());
+
+			buttonDuoMageSwaps.setForeground(Color.CYAN);
+			buttonDuoMageSwaps.setFont(buttonFont);
+		}
+	}
+
 	private void _resetRolesSelection()
 	{
 		config.setPreviousRole("");
@@ -521,9 +549,11 @@ public class NyloerSidePanel extends PluginPanel
 		buttonRangeSwaps.setForeground(Color.GRAY);
 		buttonMeleeSwaps.setForeground(Color.GRAY);
 		buttonCustomSwaps.setForeground(Color.GRAY);
+		buttonDuoMageSwaps.setForeground(Color.GRAY);
 		buttonMageSwaps.setFont(buttonFont);
 		buttonRangeSwaps.setFont(buttonFont);
 		buttonMeleeSwaps.setFont(buttonFont);
 		buttonCustomSwaps.setFont(buttonFont);
+		buttonDuoMageSwaps.setFont(buttonFont);
 	}
 }

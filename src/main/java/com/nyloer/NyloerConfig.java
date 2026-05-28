@@ -671,6 +671,72 @@ public interface NyloerConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "duoMageRoleSwaps",
+		name = "Duo Mage Swaps",
+		description = "Custom swaps for Duo Mage role",
+		section = roleSwapperSettings,
+		position = 23
+	)
+	default String duoMageRoleSwaps()
+	{
+		return "attack,nylocas ischyros*260*\n" +
+			"attack,nylocas ischyros*162*\n" +
+			"attack,nylocas toxobolos*260*\n" +
+			"attack,nylocas toxobolos*162*\n" +
+			"attack,nylocas hagios*260*\n" +
+			"attack,nylocas hagios*162*";
+	}
+
+	@ConfigItem(
+		keyName = "duoMageRoleShiftSwaps",
+		name = "Duo Mage Shift Swaps",
+		description = "Custom shift swaps for Duo Mage role",
+		section = roleSwapperSettings,
+		position = 24
+	)
+	default String duoMageRoleShiftSwaps()
+	{
+		return "/walk here,*\n" +
+			"/attack,nylocas hagios*162*";
+	}
+
+	@ConfigItem(
+		keyName = "duoMageHighlightMageTiles",
+		name = "Highlight Mage Tiles",
+		description = "Highlights mage nylo tiles when Duo Mage role is selected.",
+		section = roleSwapperSettings,
+		position = 25
+	)
+	default boolean duoMageHighlightMageTiles()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "duoMageHighlightRangeTiles",
+		name = "Highlight Range Tiles",
+		description = "Highlights range nylo tiles when Duo Mage role is selected.",
+		section = roleSwapperSettings,
+		position = 26
+	)
+	default boolean duoMageHighlightRangeTiles()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "duoMageHighlightMeleeTiles",
+		name = "Highlight Melee Tiles",
+		description = "Highlights melee nylo tiles when Duo Mage role is selected.",
+		section = roleSwapperSettings,
+		position = 27
+	)
+	default boolean duoMageHighlightMeleeTiles()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "previousRole",
 		name = "",
 		description = "",
