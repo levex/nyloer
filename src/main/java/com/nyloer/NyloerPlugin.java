@@ -97,6 +97,9 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	@Getter private int nylocasAliveCount;
 	@Getter private final List<NyloerNpc> nyloers = new ArrayList<>();
 	@Getter private final Map<Integer, NyloerNpc> nyloersIndexMap = new HashMap<>();
+	// Persists wave/spawn assignments across despawn/respawn cycles to handle client-side NPC flicker.
+	private final Map<Integer, Integer> nyloIndexWaveMap = new HashMap<>();
+	private final Map<Integer, String> nyloIndexSpawnMap = new HashMap<>();
 	/** Each rule: {tickThreshold, dimSmalls(1/0), dimBigs(1/0)}. A nylo is dimmed if its spawnTick <= tickThreshold and its size bit is set. */
 	@Getter private final List<int[]> activeDimRules = new ArrayList<>();
 
@@ -204,8 +207,11 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		pendingDarkerEvents.clear();
 		waveSpawnTicks.clear();
 		pillarsSpawned = false;
+		lastWaveTickSpawned = 0;
 		nyloers.clear();
 		nyloerOverlay.nyloers.clear();
+		nyloIndexWaveMap.clear();
+		nyloIndexSpawnMap.clear();
 	}
 
 	// ---- side panel
@@ -531,14 +537,27 @@ public class NyloerPlugin extends Plugin implements KeyListener
 
 	private void registerNyloer(NPC npc)
 	{
+		Integer knownWave = nyloIndexWaveMap.get(npc.getIndex());
+		if (knownWave != null)
+		{
+			// Flicker: NPC despawned and respawned with the same index. Restore the original
+			// wave assignment without disturbing the global wave counter.
+			NyloerNpc nyloer = new NyloerNpc(npc, client, config, customFontConfig, knownWave, lastWaveTickSpawned);
+			nyloers.add(nyloer);
+			nyloersIndexMap.put(nyloer.getIndex(), nyloer);
+			nylocasAliveCount = nyloersIndexMap.size();
+			return;
+		}
 		NyloerNpc nyloer = new NyloerNpc(npc, client, config, customFontConfig, waveNumber, lastWaveTickSpawned);
-		if (!nyloer.getSpawn().equals("SPLIT") && lastWaveTickSpawned != client.getTickCount())
+		if (!nyloer.getSpawn().equals("SPLIT") && client.getTickCount() - lastWaveTickSpawned >= 4)
 		{
 			handleNewWave(nyloer);
 		}
 		nyloers.add(nyloer);
 		nyloersIndexMap.put(nyloer.getIndex(), nyloer);
 		nylocasAliveCount = nyloersIndexMap.size();
+		nyloIndexWaveMap.put(nyloer.getIndex(), nyloer.getWaveSpawned());
+		nyloIndexSpawnMap.put(nyloer.getIndex(), nyloer.getSpawn());
 	}
 
 	private void handleNewWave(NyloerNpc nyloer)
