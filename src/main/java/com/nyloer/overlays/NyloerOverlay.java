@@ -42,7 +42,7 @@ public class NyloerOverlay extends Overlay
 	public Dimension render(Graphics2D graphics)
 	{
 		this.nyloers.clear();
-		if (this.plugin.getNylocasAliveCount() == 0 || this.plugin.isRuleLimitModelActive())
+		if (this.plugin.getNylocasAliveCount() == 0)
 		{
 			return null;
 		}
