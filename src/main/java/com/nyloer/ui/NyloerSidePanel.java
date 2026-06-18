@@ -14,6 +14,9 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.swing.*;
@@ -50,6 +53,10 @@ public class NyloerSidePanel extends PluginPanel
 	JTable statsTable;
 	DefaultTableModel statsTableModel;
 	JScrollBar statsTableScrollBar;
+
+	// Per-row snapshot of the stalls for each Recent Times entry, kept in sync
+	// with statsTableModel rows (index 0 is the most recent room).
+	private final List<List<Stall>> recentStalls = new ArrayList<>();
 
 	@Inject
 	public NyloerSidePanel(Client client, NyloerPlugin plugin, NyloerConfig config)
@@ -99,10 +106,12 @@ public class NyloerSidePanel extends PluginPanel
 		});
 	}
 
-	public void addStats(Stats stats)
+	public void addStats(Stats stats, List<Stall> stalls)
 	{
 		// Snapshot the row on the calling (client) thread: the shared Stats object
 		// is reset immediately after this call, so the EDT must not read it later.
+		// The stalls list is likewise cleared on reset, so copy it too.
+		final List<Stall> stallsSnapshot = new ArrayList<>(stalls);
 		final Object[] row = new Object[]{
 			stats.totalTime,
 			stats.bossTime,
@@ -120,7 +129,11 @@ public class NyloerSidePanel extends PluginPanel
 			stats.bigsAlive30 != -1 ? stats.bigsAlive30 : "",
 			stats.bigsAlive31 != -1 ? stats.bigsAlive31 : ""
 		};
-		SwingUtilities.invokeLater(() -> statsTableModel.insertRow(0, row));
+		SwingUtilities.invokeLater(() ->
+		{
+			statsTableModel.insertRow(0, row);
+			recentStalls.add(0, stallsSnapshot);
+		});
 	}
 
 	public void resetStallsTable()
@@ -369,6 +382,21 @@ public class NyloerSidePanel extends PluginPanel
 		statsTable.setShowGrid(false);
 		statsTable.setFillsViewportHeight(true);
 
+		statsTable.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				maybeShowStallsMenu(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				maybeShowStallsMenu(e);
+			}
+		});
+
 		DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer();
 		cellRenderer.setVerticalAlignment(JLabel.CENTER);
 		cellRenderer.setHorizontalAlignment(JLabel.CENTER);
@@ -450,6 +478,39 @@ public class NyloerSidePanel extends PluginPanel
 				statsTableModel.removeRow(i);
 			}
 		}
+		recentStalls.clear();
+	}
+
+	private void maybeShowStallsMenu(MouseEvent e)
+	{
+		if (!e.isPopupTrigger())
+		{
+			return;
+		}
+		final int row = statsTable.rowAtPoint(e.getPoint());
+		if (row < 0 || row >= recentStalls.size())
+		{
+			return;
+		}
+
+		JPopupMenu menu = new JPopupMenu();
+		JMenuItem showStalls = new JMenuItem("Show stalls");
+		showStalls.setFont(buttonFont);
+		showStalls.addActionListener(ev -> openStallsDialog(row));
+		menu.add(showStalls);
+		menu.show(statsTable, e.getX(), e.getY());
+	}
+
+	private void openStallsDialog(int row)
+	{
+		if (row < 0 || row >= recentStalls.size())
+		{
+			return;
+		}
+		String roomLabel = String.valueOf(statsTableModel.getValueAt(row, 0));
+		Window owner = SwingUtilities.getWindowAncestor(this);
+		StallsDialog dialog = new StallsDialog(owner, roomLabel, recentStalls.get(row));
+		dialog.setVisible(true);
 	}
 
 	private void _configureMageSwaps()

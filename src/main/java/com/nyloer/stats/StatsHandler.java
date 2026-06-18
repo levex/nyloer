@@ -327,7 +327,7 @@ public class StatsHandler
 		stats.totalTime = _ticks2Time(tTotal);
 		stats.bossTime = _ticks2Time(tBoss);
 		stats.wavesTime = _ticks2Time(tBossSpawn);
-		plugin.sidePanel.addStats(stats);
+		plugin.sidePanel.addStats(stats, stalls);
 	}
 
 	private boolean isCapCheck()
