@@ -216,15 +216,16 @@ public class StatsHandler
 			return;
 		}
 		String msg = Text.removeTags(event.getMessage());
-		if (NYLO_COMPLETE_MESSAGE.matcher(msg).find())
+		if (NYLO_COMPLETE_MESSAGE.matcher(msg).find() || NYLO_RETRY_MESSAGE.matcher(msg).find())
 		{
-			addStats();
-			reset();
-		}
-		else if (NYLO_RETRY_MESSAGE.matcher(msg).find())
-		{
-			addStats();
-			reset();
+			try
+			{
+				addStats();
+			}
+			finally
+			{
+				reset();
+			}
 		}
 	}
 
@@ -239,8 +240,14 @@ public class StatsHandler
 		boolean inTob = tobVar == 2 || tobVar == 3;
 		if (!inTob && currentWave != 0)
 		{
-			addStats();
-			reset();
+			try
+			{
+				addStats();
+			}
+			finally
+			{
+				reset();
+			}
 		}
 	}
 

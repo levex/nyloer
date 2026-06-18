@@ -91,44 +91,50 @@ public class NyloerSidePanel extends PluginPanel
 
 	public void addStall(Stall stall)
 	{
-		String aliveDisplay = stall.getAliveCount() + "/" + stall.getCapSize();
-		stallsTableModel.addRow(new Object[]{stall.getWave(), aliveDisplay, stall.getTotalStalls()});
-		stallsTableScrollBar.setValue(stallsTableScrollBar.getMaximum() + 100);
+		SwingUtilities.invokeLater(() ->
+		{
+			String aliveDisplay = stall.getAliveCount() + "/" + stall.getCapSize();
+			stallsTableModel.addRow(new Object[]{stall.getWave(), aliveDisplay, stall.getTotalStalls()});
+			stallsTableScrollBar.setValue(stallsTableScrollBar.getMaximum() + 100);
+		});
 	}
 
 	public void addStats(Stats stats)
 	{
-		statsTableModel.insertRow(
-			0,
-			new Object[]{
-				stats.totalTime,
-				stats.bossTime,
-				stats.wavesTime,
-				stats.stallCountPre != 0 ? stats.stallCountPre : "",
-				stats.stallCount1to12 != 0 ? stats.stallCount1to12 : "",
-				stats.stallCount13to19 != 0 ? stats.stallCount13to19 : "",
-				stats.stallCount21 != 0 ? stats.stallCount21 : "",
-				stats.stallCount22to27 != 0 ? stats.stallCount22to27 : "",
-				stats.stallCount28 != 0 ? stats.stallCount28 : "",
-				stats.stallCount29 != 0 ? stats.stallCount29 : "",
-				stats.stallCount30 != 0 ? stats.stallCount30 : "",
-				stats.bigsAlive22 != -1 ? stats.bigsAlive22 : "",
-				stats.bigsAlive29 != -1 ? stats.bigsAlive29 : "",
-				stats.bigsAlive30 != -1 ? stats.bigsAlive30 : "",
-				stats.bigsAlive31 != -1 ? stats.bigsAlive31 : ""
-			}
-		);
+		// Snapshot the row on the calling (client) thread: the shared Stats object
+		// is reset immediately after this call, so the EDT must not read it later.
+		final Object[] row = new Object[]{
+			stats.totalTime,
+			stats.bossTime,
+			stats.wavesTime,
+			stats.stallCountPre != 0 ? stats.stallCountPre : "",
+			stats.stallCount1to12 != 0 ? stats.stallCount1to12 : "",
+			stats.stallCount13to19 != 0 ? stats.stallCount13to19 : "",
+			stats.stallCount21 != 0 ? stats.stallCount21 : "",
+			stats.stallCount22to27 != 0 ? stats.stallCount22to27 : "",
+			stats.stallCount28 != 0 ? stats.stallCount28 : "",
+			stats.stallCount29 != 0 ? stats.stallCount29 : "",
+			stats.stallCount30 != 0 ? stats.stallCount30 : "",
+			stats.bigsAlive22 != -1 ? stats.bigsAlive22 : "",
+			stats.bigsAlive29 != -1 ? stats.bigsAlive29 : "",
+			stats.bigsAlive30 != -1 ? stats.bigsAlive30 : "",
+			stats.bigsAlive31 != -1 ? stats.bigsAlive31 : ""
+		};
+		SwingUtilities.invokeLater(() -> statsTableModel.insertRow(0, row));
 	}
 
 	public void resetStallsTable()
 	{
-		if (stallsTableModel.getRowCount() > 0)
+		SwingUtilities.invokeLater(() ->
 		{
-			for (int i = stallsTableModel.getRowCount() - 1; i > -1; i--)
+			if (stallsTableModel.getRowCount() > 0)
 			{
-				stallsTableModel.removeRow(i);
+				for (int i = stallsTableModel.getRowCount() - 1; i > -1; i--)
+				{
+					stallsTableModel.removeRow(i);
+				}
 			}
-		}
+		});
 	}
 
 	private JPanel createMakeDarkerFrame()
