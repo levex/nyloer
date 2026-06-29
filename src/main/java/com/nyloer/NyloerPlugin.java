@@ -404,6 +404,10 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		NyloerNpc nyloer = nyloersIndexMap.remove(npc.getIndex());
 		if (nyloer != null)
 		{
+			// Drop the orphaned entry from the render list too. Otherwise a despawn (which is not a
+			// death, so isAlive stays true for 52 ticks) leaves a ghost highlight at the stale
+			// location, and a flicker respawn adds a second entry for the same index — a duplicate.
+			nyloers.remove(nyloer);
 			nylocasAliveCount = nyloersIndexMap.size();
 		}
 	}

@@ -391,11 +391,21 @@ public class StatsHandler
 	{
 		switch (npc.getId())
 		{
+			// The boss cycles its NPC id as it rotates colours (see onNpcChanged), and despawns at
+			// whatever id it currently holds. We must match every rotation id, not just the base
+			// spawn id (10786/10807) of the newer variants — otherwise a boss that dies after
+			// rotating leaves bossDeathT == -1 and the Boss/Room times come out blank.
 			case NpcID.NYLOCAS_VASILIAS_8355:
 			case NpcID.NYLOCAS_VASILIAS_8356:
 			case NpcID.NYLOCAS_VASILIAS_8357:
 			case NpcID.NYLOCAS_VASILIAS_10786:
+			case NpcID.NYLOCAS_VASILIAS_10787:
+			case NpcID.NYLOCAS_VASILIAS_10788:
+			case NpcID.NYLOCAS_VASILIAS_10789:
 			case NpcID.NYLOCAS_VASILIAS_10807:
+			case NpcID.NYLOCAS_VASILIAS_10808:
+			case NpcID.NYLOCAS_VASILIAS_10809:
+			case NpcID.NYLOCAS_VASILIAS_10810:
 				return true;
 		}
 		return false;
