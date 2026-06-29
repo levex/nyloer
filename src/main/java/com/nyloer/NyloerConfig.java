@@ -119,6 +119,18 @@ public interface NyloerConfig extends Config
 		return 2;
 	}
 
+	@ConfigItem(
+		position = 8,
+		keyName = "autoOpenPanel",
+		name = "Auto open panel",
+		description = "When to automatically open the Nyloer panel.<br />Off: never auto-open.<br />Area: open when entering the Nylocas area.<br />Start: open when wave 1 spawns.<br />Both: open on area enter and room start.",
+		section = generalSettings
+	)
+	default AutoOpenMode autoOpenPanel()
+	{
+		return AutoOpenMode.ENTER_AREA;
+	}
+
 	// ------------------------------------------------------------
 
 	@ConfigSection(
