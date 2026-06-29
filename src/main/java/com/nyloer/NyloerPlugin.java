@@ -13,6 +13,7 @@ import com.nyloer.stats.StatsHandler;
 import com.nyloer.ui.NyloerSidePanel;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import javax.swing.SwingUtilities;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -463,6 +464,10 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		if (isNylocasRegion && !isNylocasRegionLast)
 		{
 			start();
+			if (config.autoSwitchPanel())
+			{
+				SwingUtilities.invokeLater(() -> clientToolbar.openPanel(sidePanelButton));
+			}
 		}
 		else if (!isNylocasRegion && isNylocasRegionLast)
 		{

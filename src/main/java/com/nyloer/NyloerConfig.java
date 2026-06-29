@@ -119,6 +119,18 @@ public interface NyloerConfig extends Config
 		return 2;
 	}
 
+	@ConfigItem(
+		position = 8,
+		keyName = "autoSwitchPanel",
+		name = "Auto switch panel",
+		description = "Automatically switch to the Nyloer panel when entering the Nylocas room.",
+		section = generalSettings
+	)
+	default boolean autoSwitchPanel()
+	{
+		return true;
+	}
+
 	// ------------------------------------------------------------
 
 	@ConfigSection(
