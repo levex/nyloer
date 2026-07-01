@@ -147,10 +147,15 @@ public class StatsHandler
 		NPC npc = npcDespawned.getNpc();
 		if (isNylocas(npc))
 		{
-			if (plugin.getNyloersIndexMap().size() == 0)
-			{
-				lastNyloDeathT = client.getTickCount();
-			}
+			// Record the tick of every regular-nylo despawn; the last one to fire in a room is the
+			// final death, so this naturally holds the "all nylos cleared" tick by room end.
+			//
+			// We deliberately do NOT gate this on plugin.getNyloersIndexMap().size() == 0. That map is
+			// never cleared between rooms and the plugin only removes from it while in the Nylocas
+			// region, so a despawn that lands once the region flag has flipped (leaving the room,
+			// wiping, end of raid) leaves a stale entry and the size never returns to 0 again. That
+			// made lastNyloDeathT stuck at -1 and silently dropped the whole Recent Times row.
+			lastNyloDeathT = client.getTickCount();
 		}
 		else if (isNylocasVasiliasDespawn(npc))
 		{

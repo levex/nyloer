@@ -143,6 +143,7 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		pillarsSpawned = false;
 		lastWaveTickSpawned = 0;
 		nyloers.clear();
+		nyloersIndexMap.clear();
 		nyloerOverlay.nyloers.clear();
 		nyloIndexWaveMap.clear();
 		nyloIndexSpawnMap.clear();
@@ -157,6 +158,11 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		sidePanelButton = NavigationButton.builder().tooltip("Nyloer").icon(icon).priority(6).panel(sidePanel).build();
 		clientToolbar.addNavigation(sidePanelButton);
 		sidePanel.startPanel();
+	}
+
+	private void openSidePanel()
+	{
+		SwingUtilities.invokeLater(() -> clientToolbar.openPanel(sidePanelButton));
 	}
 
 	private void removeSidePanel()
@@ -296,9 +302,9 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		if (isNylocasRegion && !isNylocasRegionLast)
 		{
 			start();
-			if (config.autoSwitchPanel())
+			if (config.autoOpenPanel().opensOnEnterArea())
 			{
-				SwingUtilities.invokeLater(() -> clientToolbar.openPanel(sidePanelButton));
+				openSidePanel();
 			}
 		}
 		else if (!isNylocasRegion && isNylocasRegionLast)
@@ -400,6 +406,10 @@ public class NyloerPlugin extends Plugin implements KeyListener
 		if (waveNumber == 1)
 		{
 			wave1Tick = client.getTickCount();
+			if (config.autoOpenPanel().opensOnRoomStart())
+			{
+				openSidePanel();
+			}
 		}
 		scheduleDarkerEvents();
 	}
