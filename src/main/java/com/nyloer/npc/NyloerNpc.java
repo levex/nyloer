@@ -36,6 +36,29 @@ public class NyloerNpc
 
 	public NyloerNpc(NPC npc, Client client, NyloerConfig config, CustomFontConfig customFontConfig, int waveNumber, int lastWaveTickSpawned)
 	{
+		this(config, customFontConfig, npc, client);
+		this.spawn = findSpawn(npc, client);
+		this.isSplit = spawn.equals("SPLIT");
+		this.waveSpawned = (isSplit && tickSpawned > lastWaveTickSpawned) ? waveNumber + 1 : waveNumber;
+		finishInit(npc);
+	}
+
+	/**
+	 * Restores a nylo after client-side NPC flicker. Stored wave/spawn values are applied as-is;
+	 * the split +1 formula must not run again on top of an already-resolved display number.
+	 */
+	public static NyloerNpc restoreFlicker(NPC npc, Client client, NyloerConfig config, CustomFontConfig customFontConfig, int waveSpawned, String spawn)
+	{
+		NyloerNpc nyloer = new NyloerNpc(config, customFontConfig, npc, client);
+		nyloer.spawn = spawn;
+		nyloer.isSplit = spawn.equals("SPLIT");
+		nyloer.waveSpawned = waveSpawned;
+		nyloer.finishInit(npc);
+		return nyloer;
+	}
+
+	private NyloerNpc(NyloerConfig config, CustomFontConfig customFontConfig, NPC npc, Client client)
+	{
 		this.config = config;
 		this.customFontConfig = customFontConfig;
 		this.npc = npc;
@@ -43,12 +66,13 @@ public class NyloerNpc
 		this.lastId = npc.getId();
 		this.index = npc.getIndex();
 		this.isAlive = true;
-		this.spawn = findSpawn(npc, client);
-		this.isSplit = spawn.equals("SPLIT");
 		this.tickSpawned = client.getTickCount();
 		this.colorDarker = false;
-		this.waveSpawned = (isSplit && tickSpawned > lastWaveTickSpawned) ? waveNumber + 1 : waveNumber;
 		this.ticksAlive = 0;
+	}
+
+	private void finishInit(NPC npc)
+	{
 		updateStyle(id);
 		configureFonts();
 		this.size = NyloSize.fromNpcSize(npc.getComposition().getSize());

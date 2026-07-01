@@ -375,11 +375,13 @@ public class NyloerPlugin extends Plugin implements KeyListener
 	private void registerNyloer(NPC npc)
 	{
 		Integer knownWave = nyloIndexWaveMap.get(npc.getIndex());
-		if (knownWave != null)
+		String knownSpawn = nyloIndexSpawnMap.get(npc.getIndex());
+		if (knownWave != null && knownSpawn != null)
 		{
 			// Flicker: NPC despawned and respawned with the same index. Restore the original
-			// wave assignment without disturbing the global wave counter.
-			NyloerNpc nyloer = new NyloerNpc(npc, client, config, customFontConfig, knownWave, lastWaveTickSpawned);
+			// wave/spawn assignment without disturbing the global wave counter or re-applying
+			// the split +1 formula to an already-resolved display number.
+			NyloerNpc nyloer = NyloerNpc.restoreFlicker(npc, client, config, customFontConfig, knownWave, knownSpawn);
 			nyloers.add(nyloer);
 			nyloersIndexMap.put(nyloer.getIndex(), nyloer);
 			nylocasAliveCount = nyloersIndexMap.size();
